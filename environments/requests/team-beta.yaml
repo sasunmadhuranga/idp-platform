@@ -1,0 +1,5 @@
+team_name: team-beta
+environment: staging
+cpu_limit: "2"
+memory_limit: "4Gi"
+owner_email: beta-team@example.com

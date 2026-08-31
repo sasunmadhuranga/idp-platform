@@ -1,0 +1,126 @@
+name: IDP Namespace Provisioning
+
+on:
+  pull_request:
+    paths:
+      - "environments/requests/**"
+  push:
+    branches: [main]
+    paths:
+      - "environments/requests/**"
+
+# Required for aws-actions/configure-aws-credentials to assume an AWS
+# IAM role via GitHub's OIDC provider (no long-lived AWS keys stored
+# as secrets). pull-requests: write is for the plan-comment step.
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+env:
+  TF_VERSION: "1.6.6"
+  AWS_REGION: "us-east-1"
+
+jobs:
+  policy-check:
+    name: Validate requests against policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Conftest
+        run: |
+          wget -q https://github.com/open-policy-agent/conftest/releases/download/v0.55.0/conftest_0.55.0_Linux_x86_64.tar.gz
+          tar xzf conftest_0.55.0_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin
+
+      - name: Run policy checks
+        run: conftest test environments/requests/*.yaml --policy policy/
+
+  plan:
+    name: Terraform plan
+    needs: policy-check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Terraform init
+        run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" -backend-config="key=idp-platform/terraform.tfstate" -backend-config="region=${{ env.AWS_REGION }}"
+
+      - name: Terraform plan
+        id: plan
+        run: terraform plan -no-color -out=tfplan -var="eks_cluster_name=${{ secrets.EKS_CLUSTER_NAME }}" -var="aws_region=${{ env.AWS_REGION }}"
+        continue-on-error: true
+
+      - name: Comment plan on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `#### Terraform Plan\n\`\`\`\n${{ steps.plan.outputs.stdout }}\n\`\`\``;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+  apply:
+    name: Terraform apply + render manifests
+    needs: policy-check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Terraform init
+        run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" -backend-config="key=idp-platform/terraform.tfstate" -backend-config="region=${{ env.AWS_REGION }}"
+
+      - name: Terraform apply
+        run: terraform apply -auto-approve -var="eks_cluster_name=${{ secrets.EKS_CLUSTER_NAME }}" -var="aws_region=${{ env.AWS_REGION }}"
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      # ArgoCD's ApplicationSet watches environments/rendered/ rather than
+      # reading Terraform state directly (ArgoCD has no native Terraform
+      # awareness), so this step exports each provisioned namespace's
+      # live resources as plain manifests for GitOps sync.
+      - name: Render manifests for ArgoCD
+        run: ./scripts/render-manifests.sh
+
+      - name: Commit rendered manifests
+        run: |
+          git config user.name "idp-bot"
+          git config user.email "idp-bot@users.noreply.github.com"
+          git add environments/rendered/ || true
+          git diff --staged --quiet || git commit -m "chore: render manifests [skip ci]"
+          git push

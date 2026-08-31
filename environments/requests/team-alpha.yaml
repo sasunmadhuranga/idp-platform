@@ -1,0 +1,12 @@
+# Self-service namespace request.
+# Open a PR adding a file like this to provision a new namespace.
+# CI validates this against policy/ before it's ever applied.
+
+team_name: team-alpha
+environment: dev
+cpu_limit: "4"
+memory_limit: "8Gi"
+cpu_limit_max: "6"
+memory_limit_max: "12Gi"
+max_pods: 30
+owner_email: alpha-team@example.com

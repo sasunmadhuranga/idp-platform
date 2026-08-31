@@ -1,0 +1,42 @@
+# ArgoCD ApplicationSet: automatically creates one Application per
+# request file in environments/requests/. Drop a new YAML file in that
+# folder (via PR) and, once merged, ArgoCD's Git generator picks it up
+# on its next poll (default 3min) and provisions it — no manual
+# `argocd app create` needed per team.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: idp-namespace-requests
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/sasunmadhuranga/idp-platform.git
+        revision: main
+        files:
+          - path: "environments/requests/*.yaml"
+
+  template:
+    metadata:
+      name: "idp-{{path.basenameNormalized}}"
+      labels:
+        platform.io/managed-by: idp
+    spec:
+      project: default
+      # Terraform isn't natively rendered by ArgoCD, so this
+      # ApplicationSet tracks the *result* of terraform apply (see
+      # provision.yml), which writes rendered K8s manifests to
+      # environments/rendered/<team>-<env>/ for ArgoCD to sync from.
+      source:
+        repoURL: https://github.com/sasunmadhuranga/idp-platform.git
+        targetRevision: main
+        path: "environments/rendered/{{path.basenameNormalized}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{path.basenameNormalized}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

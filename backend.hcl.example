@@ -1,0 +1,12 @@
+# Copy this file to backend.hcl (which is gitignored) and fill in your
+# real values, then run:
+#   terraform init -backend-config=backend.hcl
+#
+# Or pass the same values as -backend-config flags individually, which
+# is what the GitHub Actions workflow does using repo secrets.
+
+bucket         = "idp-platform-tfstate"
+key            = "idp-platform/terraform.tfstate"
+region         = "us-east-1"
+dynamodb_table = "idp-platform-tf-locks"
+encrypt        = true
