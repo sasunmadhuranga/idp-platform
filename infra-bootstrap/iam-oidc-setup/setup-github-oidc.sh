@@ -41,22 +41,29 @@ else
 fi
 
 # --- 2. Fill in the real account ID in the trust policy, create the role ---
-sed "s/ACCOUNT_ID/${ACCOUNT_ID}/g" "${SCRIPT_DIR}/trust-policy.json" > /tmp/trust-policy-filled.json
+# Temp files live next to the script (not /tmp) — on Windows/Git Bash,
+# /tmp is an MSYS-internal path that the native aws.exe binary can't
+# resolve, causing a "No such file or directory" error even though the
+# file exists from bash's point of view.
+TRUST_POLICY_TMP="${SCRIPT_DIR}/.trust-policy-filled.json"
+PERMISSIONS_POLICY_TMP="${SCRIPT_DIR}/.permissions-policy-filled.json"
+
+sed "s/ACCOUNT_ID/${ACCOUNT_ID}/g" "${SCRIPT_DIR}/trust-policy.json" > "${TRUST_POLICY_TMP}"
 
 echo "Creating IAM role: ${ROLE_NAME}..."
 aws iam create-role \
   --role-name "${ROLE_NAME}" \
-  --assume-role-policy-document file:///tmp/trust-policy-filled.json \
+  --assume-role-policy-document "file://${TRUST_POLICY_TMP}" \
   --description "Assumed by GitHub Actions CI for idp-platform"
 
 # --- 3. Attach the scoped permissions policy ---
 sed -e "s/ACCOUNT_ID/${ACCOUNT_ID}/g" -e "s/REGION/${REGION}/g" \
-  "${SCRIPT_DIR}/permissions-policy.json" > /tmp/permissions-policy-filled.json
+  "${SCRIPT_DIR}/permissions-policy.json" > "${PERMISSIONS_POLICY_TMP}"
 
 aws iam put-role-policy \
   --role-name "${ROLE_NAME}" \
   --policy-name "idp-platform-ci-permissions" \
-  --policy-document file:///tmp/permissions-policy-filled.json
+  --policy-document "file://${PERMISSIONS_POLICY_TMP}"
 
 ROLE_ARN=$(aws iam get-role --role-name "${ROLE_NAME}" --query 'Role.Arn' --output text)
 
@@ -77,4 +84,4 @@ echo "    --principal-arn ${ROLE_ARN} \\"
 echo "    --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy \\"
 echo "    --access-scope type=cluster --region ${REGION}"
 
-rm -f /tmp/trust-policy-filled.json /tmp/permissions-policy-filled.json
+rm -f "${TRUST_POLICY_TMP}" "${PERMISSIONS_POLICY_TMP}"

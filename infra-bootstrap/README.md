@@ -14,7 +14,7 @@ namespace-provisioning state, and vice versa.
 
 - A VPC with 2 public + 2 private subnets, single NAT gateway (cost
   optimization — not multi-AZ HA, this is a demo cluster)
-- An EKS cluster (v1.29) with one managed node group, SPOT instances,
+- An EKS cluster (v1.35) with one managed node group, SPOT instances,
   t3.small, 2 nodes by default
 - ArgoCD installed via Helm (single replica, no HA)
 - IRSA (IAM Roles for Service Accounts) enabled, which also gives you
