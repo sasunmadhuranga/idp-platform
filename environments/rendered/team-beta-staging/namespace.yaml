@@ -2,9 +2,12 @@ apiVersion: v1
 kind: Namespace
 metadata:
   annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Namespace","metadata":{"annotations":{"platform.io/owner-email":"beta-team@example.com","platform.io/provisioned-by":"idp-terraform"},"labels":{"argocd.argoproj.io/instance":"idp-team-beta-staging","kubernetes.io/metadata.name":"team-beta-staging","platform.io/environment":"staging","platform.io/managed-by":"idp","platform.io/team":"team-beta"},"name":"team-beta-staging"},"spec":{"finalizers":["kubernetes"]}}
     platform.io/owner-email: beta-team@example.com
     platform.io/provisioned-by: idp-terraform
   labels:
+    argocd.argoproj.io/instance: idp-team-beta-staging
     kubernetes.io/metadata.name: team-beta-staging
     platform.io/environment: staging
     platform.io/managed-by: idp

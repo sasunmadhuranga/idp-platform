@@ -3,6 +3,11 @@ items:
   - apiVersion: v1
     kind: ResourceQuota
     metadata:
+      annotations:
+        kubectl.kubernetes.io/last-applied-configuration: |
+          {"apiVersion":"v1","kind":"ResourceQuota","metadata":{"annotations":{},"labels":{"argocd.argoproj.io/instance":"idp-team-beta-staging"},"name":"default-quota","namespace":"team-beta-staging"},"spec":{"hard":{"limits.cpu":"4","limits.memory":"8Gi","pods":"20","requests.cpu":"2","requests.memory":"4Gi"}}}
+      labels:
+        argocd.argoproj.io/instance: idp-team-beta-staging
       name: default-quota
       namespace: team-beta-staging
     spec:

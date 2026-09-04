@@ -3,6 +3,11 @@ items:
   - apiVersion: rbac.authorization.k8s.io/v1
     kind: RoleBinding
     metadata:
+      annotations:
+        kubectl.kubernetes.io/last-applied-configuration: |
+          {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"RoleBinding","metadata":{"annotations":{},"labels":{"argocd.argoproj.io/instance":"idp-team-beta-staging"},"name":"team-beta-admin-binding","namespace":"team-beta-staging"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"Role","name":"namespace-admin"},"subjects":[{"kind":"ServiceAccount","name":"team-beta-default","namespace":"team-beta-staging"}]}
+      labels:
+        argocd.argoproj.io/instance: idp-team-beta-staging
       name: team-beta-admin-binding
       namespace: team-beta-staging
     roleRef:

@@ -1,0 +1,17 @@
+apiVersion: v1
+items:
+  - apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: default-quota
+      namespace: team-gamma-dev
+    spec:
+      hard:
+        limits.cpu: "6"
+        limits.memory: 12Gi
+        pods: "30"
+        requests.cpu: "4"
+        requests.memory: 8Gi
+kind: List
+metadata:
+  resourceVersion: ""

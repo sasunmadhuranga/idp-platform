@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    platform.io/owner-email: alpha-team@example.com
+    platform.io/provisioned-by: idp-terraform
+  labels:
+    kubernetes.io/metadata.name: team-gamma-dev
+    platform.io/environment: dev
+    platform.io/managed-by: idp
+    platform.io/team: team-gamma
+  name: team-gamma-dev
+spec:
+  finalizers:
+    - kubernetes

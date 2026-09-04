@@ -3,6 +3,11 @@ items:
   - apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
+      annotations:
+        kubectl.kubernetes.io/last-applied-configuration: |
+          {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"Role","metadata":{"annotations":{},"labels":{"argocd.argoproj.io/instance":"idp-team-beta-staging"},"name":"namespace-admin","namespace":"team-beta-staging"},"rules":[{"apiGroups":["","apps","batch","networking.k8s.io"],"resources":["*"],"verbs":["list","watch","create","update","patch","get","delete"]}]}
+      labels:
+        argocd.argoproj.io/instance: idp-team-beta-staging
       name: namespace-admin
       namespace: team-beta-staging
     rules:

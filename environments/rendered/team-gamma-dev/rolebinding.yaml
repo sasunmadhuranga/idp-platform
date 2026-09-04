@@ -1,0 +1,18 @@
+apiVersion: v1
+items:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: team-gamma-admin-binding
+      namespace: team-gamma-dev
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: namespace-admin
+    subjects:
+      - kind: ServiceAccount
+        name: team-gamma-default
+        namespace: team-gamma-dev
+kind: List
+metadata:
+  resourceVersion: ""
