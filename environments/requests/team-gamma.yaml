@@ -1,7 +1,6 @@
 # Self-service namespace request.
 # Open a PR adding a file like this to provision a new namespace.
 # CI validates this against policy/ before it's ever applied.
-
 team_name: team-gamma
 environment: dev
 cpu_limit: "4"
