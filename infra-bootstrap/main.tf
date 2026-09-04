@@ -96,12 +96,25 @@ module "eks" {
   version = "~> 20.0"
 
   cluster_name    = var.cluster_name
+  # EKS deprecates old versions ~14 months after release, so this will
+  # drift over time. 1.29 was rejected as unsupported during initial
+  # testing; bumped to the version that actually worked. If this fails
+  # again in the future, check current supported versions with:
+  #   aws eks describe-addon-versions --query 'addons[0].addonVersions[0].compatibilities[].clusterVersion' (or the EKS console)
   cluster_version = "1.35"
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
   cluster_endpoint_public_access = true
+
+  # Without this, the IAM identity that runs `terraform apply` is NOT
+  # automatically granted access inside the cluster's Kubernetes RBAC
+  # layer (IAM permissions and K8s RBAC are separate systems in EKS).
+  # Omitting this causes an "Unauthorized" error the moment Terraform
+  # tries to create any Kubernetes resource (namespace, Helm release,
+  # etc.) even though the AWS-level apply succeeded.
+  enable_cluster_creator_admin_permissions = true
 
   # OIDC provider needed for IAM Roles for Service Accounts (IRSA) and
   # for GitHub Actions OIDC federation used by idp-platform's CI.

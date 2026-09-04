@@ -23,7 +23,13 @@
 
 set -euo pipefail
 
-BUCKET_NAME="${1:-idp-platform-tfstate}"
+# S3 bucket names are globally unique across ALL AWS accounts, not
+# just yours — a plain name like "idp-platform-tfstate" will very
+# likely collide with someone else's bucket. Default to suffixing
+# with your account ID, which is guaranteed unique. Override by
+# passing an explicit name as $1 if you prefer something else.
+ACCOUNT_ID_FOR_DEFAULT=$(aws sts get-caller-identity --query Account --output text)
+BUCKET_NAME="${1:-idp-platform-tfstate-${ACCOUNT_ID_FOR_DEFAULT}}"
 REGION="${2:-us-east-1}"
 LOCK_TABLE="idp-platform-tf-locks"
 

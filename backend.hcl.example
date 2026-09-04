@@ -5,7 +5,7 @@
 # Or pass the same values as -backend-config flags individually, which
 # is what the GitHub Actions workflow does using repo secrets.
 
-bucket         = "idp-platform-tfstate"
+bucket         = "idp-platform-tfstate-123456789012"  # replace with your own — must be globally unique across ALL AWS accounts; account-ID suffix is a safe default
 key            = "idp-platform/terraform.tfstate"
 region         = "us-east-1"
 dynamodb_table = "idp-platform-tf-locks"

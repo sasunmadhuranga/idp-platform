@@ -41,10 +41,15 @@ else
 fi
 
 # --- 2. Fill in the real account ID in the trust policy, create the role ---
-# Temp files live next to the script (not /tmp) — on Windows/Git Bash,
-# /tmp is an MSYS-internal path that the native aws.exe binary can't
-# resolve, causing a "No such file or directory" error even though the
-# file exists from bash's point of view.
+# Temp files live next to the script (not /tmp) for readability, but
+# note: their content is passed to aws CLI directly via $(cat ...)
+# rather than a file:// URI. On Windows/Git Bash, aws.exe is a native
+# binary and Git Bash's automatic path translation skips any argument
+# containing "://" (it assumes such arguments are URLs and leaves them
+# alone), so a file:// URI reaches aws.exe as a raw POSIX path it can't
+# resolve — regardless of whether the path is under /tmp or the repo.
+# Passing the JSON content inline avoids this entirely and works the
+# same on Linux/Mac/Windows.
 TRUST_POLICY_TMP="${SCRIPT_DIR}/.trust-policy-filled.json"
 PERMISSIONS_POLICY_TMP="${SCRIPT_DIR}/.permissions-policy-filled.json"
 
@@ -53,7 +58,7 @@ sed "s/ACCOUNT_ID/${ACCOUNT_ID}/g" "${SCRIPT_DIR}/trust-policy.json" > "${TRUST_
 echo "Creating IAM role: ${ROLE_NAME}..."
 aws iam create-role \
   --role-name "${ROLE_NAME}" \
-  --assume-role-policy-document "file://${TRUST_POLICY_TMP}" \
+  --assume-role-policy-document "$(cat "${TRUST_POLICY_TMP}")" \
   --description "Assumed by GitHub Actions CI for idp-platform"
 
 # --- 3. Attach the scoped permissions policy ---
@@ -63,7 +68,7 @@ sed -e "s/ACCOUNT_ID/${ACCOUNT_ID}/g" -e "s/REGION/${REGION}/g" \
 aws iam put-role-policy \
   --role-name "${ROLE_NAME}" \
   --policy-name "idp-platform-ci-permissions" \
-  --policy-document "file://${PERMISSIONS_POLICY_TMP}"
+  --policy-document "$(cat "${PERMISSIONS_POLICY_TMP}")"
 
 ROLE_ARN=$(aws iam get-role --role-name "${ROLE_NAME}" --query 'Role.Arn' --output text)
 

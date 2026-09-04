@@ -6,4 +6,6 @@ crash.log
 *.tfvars
 !environments/requests/*.yaml
 backend.hcl
+.trust-policy-filled.json
+.permissions-policy-filled.json
 .DS_Store

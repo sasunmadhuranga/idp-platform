@@ -1,6 +1,7 @@
 name: IDP Namespace Provisioning
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "environments/requests/**"
