@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    platform.io/owner-email: beta-team@example.com
+    platform.io/provisioned-by: idp-terraform
+  labels:
+    kubernetes.io/metadata.name: team-beta-staging
+    platform.io/environment: staging
+    platform.io/managed-by: idp
+    platform.io/team: team-beta
+  name: team-beta-staging
+spec:
+  finalizers:
+    - kubernetes

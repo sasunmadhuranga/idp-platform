@@ -1,0 +1,26 @@
+apiVersion: v1
+items:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: namespace-admin
+      namespace: team-alpha-dev
+    rules:
+      - apiGroups:
+          - ""
+          - apps
+          - batch
+          - networking.k8s.io
+        resources:
+          - '*'
+        verbs:
+          - list
+          - watch
+          - create
+          - update
+          - patch
+          - get
+          - delete
+kind: List
+metadata:
+  resourceVersion: ""

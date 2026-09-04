@@ -1,0 +1,17 @@
+apiVersion: v1
+items:
+  - apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: default-quota
+      namespace: team-beta-staging
+    spec:
+      hard:
+        limits.cpu: "4"
+        limits.memory: 8Gi
+        pods: "20"
+        requests.cpu: "2"
+        requests.memory: 4Gi
+kind: List
+metadata:
+  resourceVersion: ""
