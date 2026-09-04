@@ -1,0 +1,5 @@
+[33mcda6a63[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32madd-team-gamma[m[33m, [m[1;31morigin/add-team-gamma[m[33m)[m fix: invoke render-manifests.sh via bash explicitly, executable bit was lost on Windows commit
+[33mb17a282[m Updated
+[33m9dc1e8c[m Updaetd
+[33m8540c77[m New step added
+[33m8fcf122[m Add team-gamma
