@@ -119,7 +119,7 @@ jobs:
       # awareness), so this step exports each provisioned namespace's
       # live resources as plain manifests for GitOps sync.
       - name: Render manifests for ArgoCD
-        run: ./scripts/render-manifests.sh
+        run: bash ./scripts/render-manifests.sh
 
       - name: Commit rendered manifests
         run: |
