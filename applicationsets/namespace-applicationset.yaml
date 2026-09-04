@@ -18,7 +18,15 @@ spec:
 
   template:
     metadata:
-      name: "idp-{{path.basenameNormalized}}"
+      # team_name and environment are read directly from each request
+      # file's YAML content (ArgoCD's git "files" generator parses
+      # matched files and exposes their fields as template vars) —
+      # NOT from the filename. Using path.basenameNormalized here was
+      # a bug: it resolves to the request file's basename (e.g.
+      # "team-alpha" from team-alpha.yaml), which never matches the
+      # actual namespace name ("team-alpha-dev") the Terraform module
+      # creates as `${team_name}-${environment}`.
+      name: "idp-{{team_name}}-{{environment}}"
       labels:
         platform.io/managed-by: idp
     spec:
@@ -30,10 +38,10 @@ spec:
       source:
         repoURL: https://github.com/sasunmadhuranga/idp-platform.git
         targetRevision: main
-        path: "environments/rendered/{{path.basenameNormalized}}"
+        path: "environments/rendered/{{team_name}}-{{environment}}"
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{path.basenameNormalized}}"
+        namespace: "{{team_name}}-{{environment}}"
       syncPolicy:
         automated:
           prune: true
