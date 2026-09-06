@@ -2,11 +2,7 @@ terraform {
   required_version = ">= 1.6.0"
 
   backend "s3" {
-    # Configure via -backend-config or a backend.hcl file, e.g.:
-    # bucket = "idp-platform-tfstate"
-    # key    = "idp-platform/terraform.tfstate"
-    # region = "us-east-1"
-    # dynamodb_table = "idp-platform-tf-locks"
+    # Configure via -backend-config or a backend.hcl file
   }
 
   required_providers {
@@ -25,10 +21,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Uses exec-based auth (aws eks get-token) instead of a static
-# kubeconfig so this works both locally (with your AWS CLI creds) and
-# in GitHub Actions (with the OIDC-assumed role from configure-aws-credentials).
-# Requires the AWS CLI to be on PATH wherever `terraform apply` runs.
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.this.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
@@ -55,10 +47,6 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-# One namespace-request module instance per file in environments/requests/.
-# In CI, this is driven by a for_each over yamldecode() of each request file
-# (see .github/workflows/provision.yml) so this file itself stays static
-# and requests are added purely by dropping a new YAML file — no .tf edits needed.
 locals {
   request_files = fileset("${path.module}/environments/requests", "*.yaml")
   requests = {

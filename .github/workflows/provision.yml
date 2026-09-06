@@ -10,9 +10,6 @@ on:
     paths:
       - "environments/requests/**"
 
-# Required for aws-actions/configure-aws-credentials to assume an AWS
-# IAM role via GitHub's OIDC provider (no long-lived AWS keys stored
-# as secrets). pull-requests: write is for the plan-comment step.
 permissions:
   id-token: write
   contents: write
@@ -114,10 +111,6 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      # ArgoCD's ApplicationSet watches environments/rendered/ rather than
-      # reading Terraform state directly (ArgoCD has no native Terraform
-      # awareness), so this step exports each provisioned namespace's
-      # live resources as plain manifests for GitOps sync.
       - name: Render manifests for ArgoCD
         run: bash ./scripts/render-manifests.sh
 

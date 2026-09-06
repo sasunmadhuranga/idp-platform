@@ -1,25 +1,6 @@
-# infra-bootstrap
-#
-# Standalone, minimal EKS cluster sized purely to demo idp-platform:
-# spin up -> record demo -> destroy. NOT sized for a long-running or
-# production cluster. This is deliberately separate from
-# idp-platform's own state/module so you can destroy just the cluster
-# without touching the namespace-provisioning logic, and vice versa.
-#
-# Usage:
-#   cd infra-bootstrap
-#   terraform init
-#   terraform apply -var="cluster_name=idp-demo"
-#   ... run idp-platform's terraform apply against this cluster ...
-#   ... record your demo ...
-#   terraform destroy -var="cluster_name=idp-demo"   # tear down when done
-
 terraform {
   required_version = ">= 1.6.0"
 
-  # Configure via -backend-config=backend.hcl (see backend.hcl.example
-  # in this directory). Uses the same bucket as idp-platform's own
-  # state, but a different key, so the two states stay independent.
   backend "s3" {}
 
   required_providers {
@@ -82,7 +63,7 @@ module "vpc" {
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
 
   enable_nat_gateway   = true
-  single_nat_gateway   = true # cost optimization for a demo cluster — one NAT, not one per AZ
+  single_nat_gateway   = true 
   enable_dns_hostnames = true
 
   tags = {
@@ -96,11 +77,6 @@ module "eks" {
   version = "~> 20.0"
 
   cluster_name    = var.cluster_name
-  # EKS deprecates old versions ~14 months after release, so this will
-  # drift over time. 1.29 was rejected as unsupported during initial
-  # testing; bumped to the version that actually worked. If this fails
-  # again in the future, check current supported versions with:
-  #   aws eks describe-addon-versions --query 'addons[0].addonVersions[0].compatibilities[].clusterVersion' (or the EKS console)
   cluster_version = "1.35"
 
   vpc_id     = module.vpc.vpc_id
@@ -108,16 +84,8 @@ module "eks" {
 
   cluster_endpoint_public_access = true
 
-  # Without this, the IAM identity that runs `terraform apply` is NOT
-  # automatically granted access inside the cluster's Kubernetes RBAC
-  # layer (IAM permissions and K8s RBAC are separate systems in EKS).
-  # Omitting this causes an "Unauthorized" error the moment Terraform
-  # tries to create any Kubernetes resource (namespace, Helm release,
-  # etc.) even though the AWS-level apply succeeded.
   enable_cluster_creator_admin_permissions = true
 
-  # OIDC provider needed for IAM Roles for Service Accounts (IRSA) and
-  # for GitHub Actions OIDC federation used by idp-platform's CI.
   enable_irsa = true
 
   eks_managed_node_groups = {
@@ -127,7 +95,7 @@ module "eks" {
       max_size       = 3
       desired_size   = var.node_desired_size
 
-      capacity_type = "SPOT" # cheaper for a short-lived demo cluster
+      capacity_type = "SPOT" 
     }
   }
 
@@ -173,10 +141,8 @@ resource "helm_release" "argocd" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   namespace  = kubernetes_namespace.argocd.metadata[0].name
-  version    = "6.7.3" # pin a known-working chart version rather than floating "latest"
+  version    = "6.7.3"
 
-  # Minimal values: single replica server, no HA — this is a demo
-  # cluster, not production ArgoCD.
   set {
     name  = "server.replicas"
     value = "1"
