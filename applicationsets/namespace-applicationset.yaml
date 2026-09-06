@@ -1,8 +1,3 @@
-# ArgoCD ApplicationSet: automatically creates one Application per
-# request file in environments/requests/. Drop a new YAML file in that
-# folder (via PR) and, once merged, ArgoCD's Git generator picks it up
-# on its next poll (default 3min) and provisions it — no manual
-# `argocd app create` needed per team.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -18,23 +13,11 @@ spec:
 
   template:
     metadata:
-      # team_name and environment are read directly from each request
-      # file's YAML content (ArgoCD's git "files" generator parses
-      # matched files and exposes their fields as template vars) —
-      # NOT from the filename. Using path.basenameNormalized here was
-      # a bug: it resolves to the request file's basename (e.g.
-      # "team-alpha" from team-alpha.yaml), which never matches the
-      # actual namespace name ("team-alpha-dev") the Terraform module
-      # creates as `${team_name}-${environment}`.
       name: "idp-{{team_name}}-{{environment}}"
       labels:
         platform.io/managed-by: idp
     spec:
       project: default
-      # Terraform isn't natively rendered by ArgoCD, so this
-      # ApplicationSet tracks the *result* of terraform apply (see
-      # provision.yml), which writes rendered K8s manifests to
-      # environments/rendered/<team>-<env>/ for ArgoCD to sync from.
       source:
         repoURL: https://github.com/sasunmadhuranga/idp-platform.git
         targetRevision: main

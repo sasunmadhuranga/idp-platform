@@ -58,7 +58,6 @@ resource "kubernetes_limit_range" "this" {
   }
 }
 
-# Default-deny all ingress, then explicitly allow from platform namespaces
 resource "kubernetes_network_policy" "default_deny_ingress" {
   metadata {
     name      = "default-deny-ingress"

@@ -1,22 +1,3 @@
-#!/usr/bin/env bash
-#
-# render-manifests.sh
-#
-# Bridges Terraform-provisioned Kubernetes resources into plain YAML
-# manifests that ArgoCD's ApplicationSet can sync from. ArgoCD cannot
-# read Terraform state directly, so after `terraform apply` we export
-# the live state of each provisioned namespace as manifests under
-# environments/rendered/<team>-<environment>/, and commit them.
-#
-# This intentionally does NOT re-invent what Terraform already created —
-# it just mirrors the *result* to a Git-trackable, ArgoCD-syncable form,
-# so ArgoCD's job stays "sync what's in Git" rather than needing to
-# understand Terraform.
-#
-# Usage: ./scripts/render-manifests.sh
-# Requires: kubectl (configured against the target cluster), yq (optional,
-# for tidying output)
-
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -46,9 +27,6 @@ for request_file in "${REQUESTS_DIR}"/*.yaml; do
 
   echo "Rendering manifests for namespace: ${namespace}"
 
-  # Export each resource type Terraform provisions for this namespace,
-  # stripped of cluster-generated/mutable fields so diffs stay clean
-  # and ArgoCD doesn't fight Terraform over ownership metadata.
   for kind in namespace resourcequota limitrange networkpolicy serviceaccount role rolebinding; do
     resource_file="${out_dir}/${kind}.yaml"
 
@@ -62,7 +40,6 @@ for request_file in "${REQUESTS_DIR}"/*.yaml; do
         > "${resource_file}" 2>/dev/null || echo "  (skip) no ${kind} found in ${namespace} yet"
     fi
 
-    # Remove empty/failed exports so we don't commit noise
     [ -s "${resource_file}" ] || rm -f "${resource_file}"
   done
 
