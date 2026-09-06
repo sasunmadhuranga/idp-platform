@@ -63,7 +63,7 @@ module "vpc" {
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
 
   enable_nat_gateway   = true
-  single_nat_gateway   = true 
+  single_nat_gateway   = true
   enable_dns_hostnames = true
 
   tags = {
@@ -141,8 +141,7 @@ resource "helm_release" "argocd" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   namespace  = kubernetes_namespace.argocd.metadata[0].name
-  version    = "6.7.3" 
-
+  version    = "6.7.3"
 
   set {
     name  = "server.replicas"
