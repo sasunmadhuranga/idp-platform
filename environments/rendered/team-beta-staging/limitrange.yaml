@@ -3,6 +3,11 @@ items:
   - apiVersion: v1
     kind: LimitRange
     metadata:
+      annotations:
+        kubectl.kubernetes.io/last-applied-configuration: |
+          {"apiVersion":"v1","kind":"LimitRange","metadata":{"annotations":{},"labels":{"argocd.argoproj.io/instance":"idp-team-beta-staging"},"name":"default-limits","namespace":"team-beta-staging"},"spec":{"limits":[{"default":{"cpu":"250m","memory":"256Mi"},"defaultRequest":{"cpu":"100m","memory":"128Mi"},"type":"Container"}]}}
+      labels:
+        argocd.argoproj.io/instance: idp-team-beta-staging
       name: default-limits
       namespace: team-beta-staging
     spec:

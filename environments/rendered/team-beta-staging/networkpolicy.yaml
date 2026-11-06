@@ -3,7 +3,12 @@ items:
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
+      annotations:
+        kubectl.kubernetes.io/last-applied-configuration: |
+          {"apiVersion":"networking.k8s.io/v1","kind":"NetworkPolicy","metadata":{"annotations":{},"generation":1,"labels":{"argocd.argoproj.io/instance":"idp-team-beta-staging"},"name":"allow-platform-ingress","namespace":"team-beta-staging"},"spec":{"ingress":[{"from":[{"namespaceSelector":{"matchLabels":{"kubernetes.io/metadata.name":"ingress-nginx"}}}]},{"from":[{"namespaceSelector":{"matchLabels":{"kubernetes.io/metadata.name":"monitoring"}}}]}],"podSelector":{},"policyTypes":["Ingress"]}}
       generation: 1
+      labels:
+        argocd.argoproj.io/instance: idp-team-beta-staging
       name: allow-platform-ingress
       namespace: team-beta-staging
     spec:
@@ -22,7 +27,12 @@ items:
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
+      annotations:
+        kubectl.kubernetes.io/last-applied-configuration: |
+          {"apiVersion":"networking.k8s.io/v1","kind":"NetworkPolicy","metadata":{"annotations":{},"generation":1,"labels":{"argocd.argoproj.io/instance":"idp-team-beta-staging"},"name":"default-deny-ingress","namespace":"team-beta-staging"},"spec":{"podSelector":{},"policyTypes":["Ingress"]}}
       generation: 1
+      labels:
+        argocd.argoproj.io/instance: idp-team-beta-staging
       name: default-deny-ingress
       namespace: team-beta-staging
     spec:
