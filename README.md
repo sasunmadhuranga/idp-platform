@@ -36,15 +36,9 @@ resource usage
 
 ## Repo layout
 
-```
-modules/namespace-request/   Terraform module: namespace + quota + limits
-                              + network policy + RBAC per request
-environments/requests/       Self-service "UI" — one YAML file per team/env
-applicationsets/             ArgoCD ApplicationSet (Git generator)
-policy/                      OPA/Conftest guardrails (quota caps, naming,
-                              required fields, prod approval gate)
-.github/workflows/           CI: policy-check -> plan (PR) -> apply (merge)
-```
+<p align="center">
+  <img src="screenshots/project structure.png" width="600">
+</p>
 
 ## How a developer requests a namespace
 
