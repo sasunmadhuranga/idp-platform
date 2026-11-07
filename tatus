@@ -1,0 +1,14 @@
+* [33m0b0b1d2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Updated
+* [33mc16774a[m Updated
+* [33mb1bc49d[m Updated
+* [33me49bbc8[m Delete h origin add-team-gamma
+* [33m6975f38[m chore: render manifests [skip ci]
+*   [33m6231d7d[m Merge pull request #2 from sasunmadhuranga/add-team-gamma
+[32m|[m[33m\[m  
+[32m|[m * [33m2171293[m Updated
+[32m|[m * [33m3b78c8c[m Updated
+[32m|[m * [33m953a24c[m Add team-gamma request
+* [33m|[m [33mc0728a0[m Updated
+* [33m|[m [33ma36af5c[m Merge branch 'add-team-gamma'
+[34m|[m[33m\[m[33m|[m 
+[34m|[m * [33mcda6a63[m fix: invoke render-manifests.sh via bash explicitly, executable bit was lost on Windows commit

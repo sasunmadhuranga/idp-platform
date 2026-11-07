@@ -5,34 +5,9 @@ EKS + ArgoCD GitOps pipeline. Developers request a new namespace/environment
 by opening a pull request; policy checks and Terraform handle the rest.
 
 ## Architecture
-
-```
-Developer opens PR
-   -> environments/requests/<team>.yaml
-        |
-        v
-CI: policy-check (Conftest/OPA)
-        |
-        v
-CI: terraform plan (commented on PR)
-        |
-        v
-PR merged to main
-        |
-        v
-CI: terraform apply
-   -> creates namespace, ResourceQuota, LimitRange,
-      NetworkPolicy (default-deny + allowlist), RBAC
-        |
-        v
-ArgoCD ApplicationSet (Git generator)
-   -> detects new request file, syncs corresponding
-      Application automatically
-        |
-        v
-Grafana platform dashboard shows new namespace's
-resource usage
-```
+<p align="center">
+  <img src="screenshots/1.png" width="600">
+</p>
 
 ## Repo layout
 
@@ -113,3 +88,27 @@ source of truth for what actually gets created.
   setup.
 - Phase 2 (optional): thin Backstage catalog UI on top of this repo,
   using its scaffolder to open the request PR instead of doing it by hand.
+
+## 📸 Screenshots
+<p align="center">
+    <img src="screenshots/2.png" width="600"/>
+    <img src="screenshots/4.png" width="600"/>
+    <img src="screenshots/5.png" width="600"/>
+    <img src="screenshots/6.png" width="600"/>
+    <img src="screenshots/7.png" width="600"/>
+    <img src="screenshots/8.png" width="600"/>
+    <img src="screenshots/9.png" width="600"/>
+    <img src="screenshots/10.png" width="600"/>
+    <img src="screenshots/11.png" width="600"/>
+    <img src="screenshots/13.png" width="600"/>
+    <img src="screenshots/14.png" width="600"/>
+    <img src="screenshots/16.png" width="600"/>
+    <img src="screenshots/17.png" width="600"/>
+</p>
+
+---
+
+## Author
+Sasun Madhuranga
+
+GitHub: https://github.com/sasunmadhuranga
