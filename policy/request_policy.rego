@@ -1,7 +1,5 @@
 package main
 
-# Run with: conftest test environments/requests/*.yaml --policy policy/
-
 max_allowed_cpu_cores := 8
 max_allowed_memory_gi := 16
 max_allowed_pods := 50

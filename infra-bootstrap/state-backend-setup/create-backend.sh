@@ -1,33 +1,5 @@
-#!/usr/bin/env bash
-#
-# create-backend.sh
-#
-# One-time setup: creates the S3 bucket + DynamoDB table used for
-# Terraform remote state locking by BOTH infra-bootstrap (the EKS
-# cluster) and idp-platform (the namespaces).
-#
-# Design choice: one bucket, two keys — not two buckets. The two
-# Terraform states (cluster vs. namespaces) are kept independent by
-# using different `key` values within the same bucket, which is
-# simpler to manage and cheaper than two buckets, while still keeping
-# the two states fully separate from Terraform's point of view.
-#
-#   s3://idp-platform-tfstate/infra-bootstrap/terraform.tfstate
-#   s3://idp-platform-tfstate/idp-platform/terraform.tfstate
-#
-# This must be run with plain AWS CLI, not Terraform — you can't use
-# a Terraform S3 backend to create the very bucket that backend
-# depends on.
-#
-# Usage: ./create-backend.sh [bucket-name] [region]
-
 set -euo pipefail
 
-# S3 bucket names are globally unique across ALL AWS accounts, not
-# just yours — a plain name like "idp-platform-tfstate" will very
-# likely collide with someone else's bucket. Default to suffixing
-# with your account ID, which is guaranteed unique. Override by
-# passing an explicit name as $1 if you prefer something else.
 ACCOUNT_ID_FOR_DEFAULT=$(aws sts get-caller-identity --query Account --output text)
 BUCKET_NAME="${1:-idp-platform-tfstate-${ACCOUNT_ID_FOR_DEFAULT}}"
 REGION="${2:-us-east-1}"
@@ -38,14 +10,11 @@ echo "Region: ${REGION}"
 echo "Lock table: ${LOCK_TABLE}"
 echo ""
 
-# --- S3 bucket ---
 if aws s3api head-bucket --bucket "${BUCKET_NAME}" 2>/dev/null; then
   echo "Bucket ${BUCKET_NAME} already exists, skipping creation."
 else
   echo "Creating S3 bucket..."
   if [ "${REGION}" = "us-east-1" ]; then
-    # us-east-1 is the one region where you must NOT pass a
-    # LocationConstraint, or bucket creation fails.
     aws s3api create-bucket \
       --bucket "${BUCKET_NAME}" \
       --region "${REGION}"
@@ -75,10 +44,6 @@ aws s3api put-public-access-block \
   --public-access-block-configuration \
     BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
 
-# --- DynamoDB lock table ---
-# Both states share ONE lock table. Terraform namespaces locks by the
-# `key` in each backend config, so a shared table is safe and normal —
-# it does not risk one project's apply locking the other's.
 if aws dynamodb describe-table --table-name "${LOCK_TABLE}" --region "${REGION}" &>/dev/null; then
   echo "DynamoDB table ${LOCK_TABLE} already exists, skipping creation."
 else
